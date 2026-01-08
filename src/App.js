@@ -1,339 +1,119 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Search, User, Plus, Clock, Signal, Star, Bookmark, Share2, X, ChevronLeft, Mail, Lock, Eye, EyeOff, Menu } from 'lucide-react';
+import { Search, User, Plus, Clock, Signal, Star, Bookmark, Share2, X, ChevronLeft, Mail, Lock, Eye, EyeOff, Menu, Loader } from 'lucide-react';
 
-// Recipe Database
-const recipesDB = [
-  {
-    id: 1,
-    title: "Mediterranean Quinoa Bowl",
-    time: "25 min",
-    difficulty: "Easy",
-    rating: 4.8,
-    reviews: 234,
-    description: "A healthy and delicious bowl packed with fresh vegetables, quinoa, and a tangy lemon dressing.",
-    badge: "Healthy",
-    category: "lunch",
-    mealTime: "lunch",
-    cuisine: "Mediterranean",
-    chef: "Moria Benzene",
-    color1: "#4ECDC4",
-    color2: "#06D6A0",
-    ingredients: [
-      "1 cup quinoa",
-      "2 cups vegetable broth",
-      "1 cucumber, diced",
-      "2 tomatoes, diced",
-      "1/2 red onion, sliced",
-      "1/2 cup kalamata olives",
-      "1/2 cup feta cheese",
-      "1/4 cup olive oil",
-      "2 tbsp lemon juice",
-      "Fresh herbs (parsley, mint)"
-    ],
-    instructions: [
-      "Rinse quinoa thoroughly under cold water",
-      "Combine quinoa and vegetable broth in a pot, bring to boil",
-      "Reduce heat, cover and simmer for 15 minutes until fluffy",
-      "While quinoa cooks, prepare all vegetables",
-      "Make dressing by whisking olive oil, lemon juice, salt and pepper",
-      "Fluff cooked quinoa with a fork and let cool slightly",
-      "Combine quinoa with vegetables in a large bowl",
-      "Drizzle with dressing and toss gently",
-      "Top with feta cheese and fresh herbs",
-      "Serve immediately or refrigerate for later"
-    ],
-    servings: 4,
-    calories: 320
+// API Helper Functions
+const MEALDB_BASE_URL = 'https://www.themealdb.com/api/json/v1/1';
+
+const mealDbAPI = {
+  // Search meals by name
+  searchByName: async (query) => {
+    const response = await fetch(`${MEALDB_BASE_URL}/search.php?s=${query}`);
+    const data = await response.json();
+    return data.meals || [];
   },
-  {
-    id: 2,
-    title: "Classic Margherita Pizza",
-    time: "40 min",
-    difficulty: "Medium",
-    rating: 4.9,
-    reviews: 567,
-    description: "Homemade pizza with fresh mozzarella, basil, and a perfectly crispy crust.",
-    badge: "Popular",
-    category: "dinner",
-    mealTime: "dinner",
-    cuisine: "Italian",
-    chef: "Chef Antonio",
-    color1: "#FF6B6B",
-    color2: "#FF5252",
-    ingredients: [
-      "2 1/4 cups all-purpose flour",
-      "1 packet active dry yeast",
-      "1 tsp sugar",
-      "1 tsp salt",
-      "2 tbsp olive oil",
-      "1 cup warm water",
-      "1 cup tomato sauce",
-      "8 oz fresh mozzarella",
-      "Fresh basil leaves",
-      "Extra virgin olive oil for drizzling"
-    ],
-    instructions: [
-      "Dissolve yeast and sugar in warm water, let sit 5 minutes",
-      "Mix flour and salt in a large bowl",
-      "Add yeast mixture and olive oil, knead for 10 minutes",
-      "Place dough in oiled bowl, cover and let rise 1 hour",
-      "Preheat oven to 475°F with pizza stone if available",
-      "Roll out dough on floured surface to 12-inch circle",
-      "Spread tomato sauce evenly, leaving 1-inch border",
-      "Tear mozzarella and distribute over sauce",
-      "Bake for 12-15 minutes until crust is golden",
-      "Remove from oven, add fresh basil and drizzle with olive oil"
-    ],
-    servings: 2,
-    calories: 580
+  
+  // Get meal by ID
+  getMealById: async (id) => {
+    const response = await fetch(`${MEALDB_BASE_URL}/lookup.php?i=${id}`);
+    const data = await response.json();
+    return data.meals ? data.meals[0] : null;
   },
-  {
-    id: 3,
-    title: "Chocolate Lava Cake",
-    time: "30 min",
-    difficulty: "Medium",
-    rating: 4.7,
-    reviews: 892,
-    description: "Decadent chocolate cake with a molten center, served with vanilla ice cream.",
-    badge: "Dessert",
-    category: "dessert",
-    mealTime: "dessert",
-    cuisine: "French",
-    chef: "Moria Benzene",
-    color1: "#8B4513",
-    color2: "#654321",
-    ingredients: [
-      "4 oz dark chocolate",
-      "1/2 cup butter",
-      "2 eggs",
-      "2 egg yolks",
-      "1/4 cup sugar",
-      "2 tbsp all-purpose flour",
-      "Pinch of salt",
-      "Butter for ramekins",
-      "Cocoa powder for dusting",
-      "Vanilla ice cream for serving"
-    ],
-    instructions: [
-      "Preheat oven to 425°F",
-      "Butter four 6-oz ramekins and dust with cocoa powder",
-      "Melt chocolate and butter together in microwave, stir until smooth",
-      "Whisk eggs, egg yolks, and sugar until thick and pale",
-      "Fold melted chocolate into egg mixture",
-      "Gently fold in flour and salt",
-      "Divide batter among prepared ramekins",
-      "Bake for 12-14 minutes until edges are firm but center jiggles",
-      "Let cool for 1 minute",
-      "Invert onto plates and serve immediately with ice cream"
-    ],
-    servings: 4,
-    calories: 420
+  
+  // Get random meals
+  getRandomMeal: async () => {
+    const response = await fetch(`${MEALDB_BASE_URL}/random.php`);
+    const data = await response.json();
+    return data.meals[0];
   },
-  {
-    id: 4,
-    title: "Avocado Toast Deluxe",
-    time: "10 min",
-    difficulty: "Easy",
-    rating: 4.5,
-    reviews: 1234,
-    description: "Creamy avocado on toasted sourdough with cherry tomatoes and poached egg.",
-    badge: "Quick",
-    category: "breakfast",
-    mealTime: "breakfast",
-    cuisine: "American",
-    chef: "Chef Sarah",
-    color1: "#06D6A0",
-    color2: "#4ECDC4",
-    ingredients: [
-      "2 slices sourdough bread",
-      "1 ripe avocado",
-      "2 eggs",
-      "1 cup cherry tomatoes, halved",
-      "2 tbsp olive oil",
-      "1 clove garlic",
-      "Red pepper flakes",
-      "Salt and pepper to taste",
-      "Fresh lemon juice",
-      "Microgreens for garnish"
-    ],
-    instructions: [
-      "Toast sourdough bread until golden and crispy",
-      "Rub toasted bread with cut garlic clove",
-      "Mash avocado with lemon juice, salt, and pepper",
-      "Bring pot of water to gentle simmer for poaching eggs",
-      "Crack eggs into small bowls, gently slide into simmering water",
-      "Poach eggs for 3-4 minutes until whites are set",
-      "Spread mashed avocado generously on toast",
-      "Top with cherry tomatoes",
-      "Place poached egg on top",
-      "Garnish with red pepper flakes, microgreens, and drizzle of olive oil"
-    ],
-    servings: 2,
-    calories: 380
+  
+  // Get meals by category
+  getByCategory: async (category) => {
+    const response = await fetch(`${MEALDB_BASE_URL}/filter.php?c=${category}`);
+    const data = await response.json();
+    return data.meals || [];
   },
-  {
-    id: 5,
-    title: "Thai Green Curry",
-    time: "35 min",
-    difficulty: "Medium",
-    rating: 4.6,
-    reviews: 445,
-    description: "Aromatic Thai curry with coconut milk, vegetables, and your choice of protein.",
-    badge: "Spicy",
-    category: "dinner",
-    mealTime: "dinner",
-    cuisine: "Thai",
-    chef: "Chef Somchai",
-    color1: "#06D6A0",
-    color2: "#4ECDC4",
-    ingredients: [
-      "2 tbsp green curry paste",
-      "1 can (14 oz) coconut milk",
-      "1 lb chicken breast, sliced",
-      "1 bell pepper, sliced",
-      "1 cup bamboo shoots",
-      "1 cup baby corn",
-      "2 tbsp fish sauce",
-      "1 tbsp palm sugar",
-      "Thai basil leaves",
-      "Jasmine rice for serving"
-    ],
-    instructions: [
-      "Heat oil in large pan or wok over medium-high heat",
-      "Fry curry paste for 1-2 minutes until fragrant",
-      "Add half the coconut milk, stir until combined",
-      "Add chicken and cook until no longer pink",
-      "Pour in remaining coconut milk",
-      "Add bell pepper, bamboo shoots, and baby corn",
-      "Season with fish sauce and palm sugar",
-      "Simmer for 10-15 minutes until vegetables are tender",
-      "Stir in Thai basil leaves",
-      "Serve hot over jasmine rice"
-    ],
-    servings: 4,
-    calories: 450
+  
+  // Get meals by area (cuisine)
+  getByArea: async (area) => {
+    const response = await fetch(`${MEALDB_BASE_URL}/filter.php?a=${area}`);
+    const data = await response.json();
+    return data.meals || [];
   },
-  {
-    id: 6,
-    title: "Tacos al Pastor",
-    time: "45 min",
-    difficulty: "Medium",
-    rating: 4.8,
-    reviews: 678,
-    description: "Traditional Mexican tacos with marinated pork, pineapple, and fresh cilantro.",
-    badge: "Authentic",
-    category: "dinner",
-    mealTime: "dinner",
-    cuisine: "Mexican",
-    chef: "Chef Carlos",
-    color1: "#FF6B6B",
-    color2: "#FFD166",
-    ingredients: [
-      "2 lbs pork shoulder, thinly sliced",
-      "3 dried guajillo chiles",
-      "2 chipotle peppers",
-      "1 cup pineapple juice",
-      "4 cloves garlic",
-      "2 tsp cumin",
-      "1 tsp oregano",
-      "Corn tortillas",
-      "Fresh pineapple chunks",
-      "Cilantro and onion for topping"
-    ],
-    instructions: [
-      "Toast dried chiles in dry pan until fragrant",
-      "Soak chiles in hot water for 15 minutes",
-      "Blend chiles with pineapple juice, garlic, and spices",
-      "Marinate pork in chile mixture for at least 2 hours",
-      "Heat grill or large skillet over high heat",
-      "Cook pork slices until caramelized and crispy",
-      "Warm tortillas on griddle",
-      "Grill pineapple chunks until charred",
-      "Assemble tacos with pork, pineapple, cilantro, and onion",
-      "Serve with lime wedges and salsa"
-    ],
-    servings: 6,
-    calories: 420
+  
+  // List all categories
+  getCategories: async () => {
+    const response = await fetch(`${MEALDB_BASE_URL}/categories.php`);
+    const data = await response.json();
+    return data.categories || [];
   },
-  {
-    id: 7,
-    title: "French Croissants",
-    time: "3 hours",
-    difficulty: "Hard",
-    rating: 4.9,
-    reviews: 234,
-    description: "Buttery, flaky croissants made from scratch with layers of laminated dough.",
-    badge: "Challenge",
-    category: "breakfast",
-    mealTime: "breakfast",
-    cuisine: "French",
-    chef: "Moria Benzene",
-    color1: "#FFD166",
-    color2: "#FF6B6B",
-    ingredients: [
-      "4 cups all-purpose flour",
-      "1/3 cup sugar",
-      "1 tbsp salt",
-      "1 tbsp instant yeast",
-      "1 1/4 cups milk",
-      "1 1/2 cups cold butter",
-      "1 egg for egg wash",
-      "2 tbsp water"
-    ],
-    instructions: [
-      "Mix flour, sugar, salt, yeast, and milk into dough",
-      "Knead for 5 minutes, then refrigerate for 1 hour",
-      "Roll dough into rectangle, place butter block in center",
-      "Fold dough over butter, seal edges",
-      "Roll out and perform three letter folds",
-      "Refrigerate 30 minutes between each fold",
-      "Roll dough to 1/4 inch thickness",
-      "Cut into triangles and roll into croissant shape",
-      "Let rise for 2 hours until doubled",
-      "Brush with egg wash and bake at 400°F for 15-20 minutes"
-    ],
-    servings: 12,
-    calories: 280
-  },
-  {
-    id: 8,
-    title: "Spaghetti Carbonara",
-    time: "25 min",
-    difficulty: "Easy",
-    rating: 4.7,
-    reviews: 1023,
-    description: "Classic Roman pasta with eggs, pecorino cheese, and crispy guanciale.",
-    badge: "Classic",
-    category: "dinner",
-    mealTime: "dinner",
-    cuisine: "Italian",
-    chef: "Chef Antonio",
-    color1: "#FFD166",
-    color2: "#4ECDC4",
-    ingredients: [
-      "1 lb spaghetti",
-      "6 oz guanciale or pancetta",
-      "4 large eggs",
-      "1 cup pecorino romano",
-      "Black pepper to taste",
-      "Salt for pasta water"
-    ],
-    instructions: [
-      "Bring large pot of salted water to boil",
-      "Cook spaghetti until al dente",
-      "Meanwhile, dice guanciale and cook until crispy",
-      "Whisk eggs with grated pecorino and black pepper",
-      "Reserve 1 cup pasta water, then drain pasta",
-      "Remove pan from heat, add hot pasta to guanciale",
-      "Quickly stir in egg mixture, adding pasta water as needed",
-      "Toss vigorously to create creamy sauce",
-      "Season with more black pepper",
-      "Serve immediately with extra pecorino"
-    ],
-    servings: 4,
-    calories: 520
+  
+  // List all areas
+  getAreas: async () => {
+    const response = await fetch(`${MEALDB_BASE_URL}/list.php?a=list`);
+    const data = await response.json();
+    return data.meals || [];
   }
-];
+};
+
+// Transform MealDB data to app format
+const transformMealToRecipe = (meal) => {
+  if (!meal) return null;
+  
+  // Extract ingredients and measurements
+  const ingredients = [];
+  for (let i = 1; i <= 20; i++) {
+    const ingredient = meal[`strIngredient${i}`];
+    const measure = meal[`strMeasure${i}`];
+    if (ingredient && ingredient.trim()) {
+      ingredients.push(`${measure} ${ingredient}`.trim());
+    }
+  }
+  
+  // Split instructions into steps
+  const instructions = meal.strInstructions
+    ? meal.strInstructions.split(/\r?\n/).filter(step => step.trim().length > 0)
+    : [];
+  
+  // Determine meal time category
+  const category = meal.strCategory?.toLowerCase() || 'dinner';
+  let mealTime = 'dinner';
+  if (category.includes('breakfast')) mealTime = 'breakfast';
+  else if (category.includes('dessert')) mealTime = 'dessert';
+  
+  // Generate colors based on category
+  const colorMap = {
+    breakfast: { color1: '#06D6A0', color2: '#4ECDC4' },
+    dessert: { color1: '#8B4513', color2: '#654321' },
+    seafood: { color1: '#4ECDC4', color2: '#06D6A0' },
+    default: { color1: '#FF6B6B', color2: '#FF5252' }
+  };
+  
+  const colors = colorMap[category] || colorMap.default;
+  
+  return {
+    id: meal.idMeal,
+    title: meal.strMeal,
+    time: '30 min', // MealDB doesn't provide time, default value
+    difficulty: 'Medium', // Default difficulty
+    rating: 4.5 + Math.random() * 0.4, // Generate random rating 4.5-4.9
+    reviews: Math.floor(Math.random() * 1000) + 100,
+    description: meal.strInstructions?.substring(0, 150) + '...' || 'Delicious recipe',
+    badge: meal.strCategory || 'Popular',
+    category: mealTime,
+    mealTime: mealTime,
+    cuisine: meal.strArea || 'International',
+    chef: 'Chef ' + (meal.strArea || 'International'),
+    color1: colors.color1,
+    color2: colors.color2,
+    ingredients: ingredients,
+    instructions: instructions,
+    servings: 4, // Default servings
+    calories: 450, // Default calories
+    thumbnail: meal.strMealThumb,
+    youtubeLink: meal.strYouTube,
+    source: meal.strSource
+  };
+};
 
 const App = () => {
   const [currentPage, setCurrentPage] = useState('home');
@@ -347,8 +127,15 @@ const App = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [filterType, setFilterType] = useState('all'); // For recommended page filters
+  const [filterType, setFilterType] = useState('all');
   const [userName, setUserName] = useState('Food Lover');
+  
+  // NEW: API state management
+  const [recipes, setRecipes] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [recommendedRecipes, setRecommendedRecipes] = useState([]);
+  const [categories, setCategories] = useState([]);
 
   // Load savedRecipes from localStorage on mount
   useEffect(() => {
@@ -363,6 +150,111 @@ const App = () => {
     localStorage.setItem('savedRecipes', JSON.stringify(savedRecipes));
   }, [savedRecipes]);
 
+  // NEW: Load initial recipes on mount
+  useEffect(() => {
+    loadInitialRecipes();
+    loadCategories();
+  }, []);
+
+  const loadInitialRecipes = async () => {
+    setLoading(true);
+    try {
+      // Load random meals for recommended section
+      const randomMeals = await Promise.all(
+        Array(8).fill().map(() => mealDbAPI.getRandomMeal())
+      );
+      const transformedRecipes = randomMeals.map(transformMealToRecipe);
+      setRecipes(transformedRecipes);
+      setRecommendedRecipes(transformedRecipes.slice(0, 4));
+    } catch (err) {
+      setError('Failed to load recipes');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadCategories = async () => {
+    try {
+      const cats = await mealDbAPI.getCategories();
+      setCategories(cats);
+    } catch (err) {
+      console.error('Failed to load categories:', err);
+    }
+  };
+
+  // NEW: Search recipes from API
+  const searchRecipes = async (query) => {
+    if (!query.trim()) {
+      loadInitialRecipes();
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const results = await mealDbAPI.searchByName(query);
+      const transformedResults = results.map(transformMealToRecipe);
+      setRecipes(transformedResults);
+    } catch (err) {
+      setError('Search failed');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // NEW: Load recipes by filter
+  const loadRecipesByFilter = async (filter) => {
+    setLoading(true);
+    try {
+      let meals = [];
+      
+      // Map filter types to MealDB categories/areas
+      const categoryMap = {
+        breakfast: 'Breakfast',
+        dessert: 'Dessert',
+        lunch: 'Beef', // MealDB doesn't have lunch, using Beef as substitute
+        dinner: 'Chicken',
+        vegetarian: 'Vegetarian'
+      };
+      
+      const areaMap = {
+        italian: 'Italian',
+        mexican: 'Mexican',
+        thai: 'Thai',
+        french: 'French',
+        american: 'American',
+        mediterranean: 'Greek' // Using Greek for Mediterranean
+      };
+      
+      if (filter === 'all') {
+        // Load random meals
+        const randomMeals = await Promise.all(
+          Array(12).fill().map(() => mealDbAPI.getRandomMeal())
+        );
+        meals = randomMeals;
+      } else if (categoryMap[filter]) {
+        const results = await mealDbAPI.getByCategory(categoryMap[filter]);
+        // Get full details for first 12 meals
+        const detailPromises = results.slice(0, 12).map(m => mealDbAPI.getMealById(m.idMeal));
+        meals = await Promise.all(detailPromises);
+      } else if (areaMap[filter]) {
+        const results = await mealDbAPI.getByArea(areaMap[filter]);
+        // Get full details for first 12 meals
+        const detailPromises = results.slice(0, 12).map(m => mealDbAPI.getMealById(m.idMeal));
+        meals = await Promise.all(detailPromises);
+      }
+      
+      const transformedMeals = meals.filter(m => m !== null).map(transformMealToRecipe);
+      setRecipes(transformedMeals);
+    } catch (err) {
+      setError('Failed to load recipes');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Debounced search
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
   useEffect(() => {
@@ -370,31 +262,35 @@ const App = () => {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Memoized filtered recipes
-  const filteredRecipes = useMemo(() => {
-    return recipesDB.filter(recipe =>
-      recipe.title.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
-      recipe.description.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
-      recipe.category.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
-    );
+  // NEW: Trigger search when debounced query changes
+  useEffect(() => {
+    if (debouncedSearchQuery) {
+      searchRecipes(debouncedSearchQuery);
+    }
   }, [debouncedSearchQuery]);
 
-  const recommendedRecipes = useMemo(() => filteredRecipes.slice(0, 4), [filteredRecipes]);
-  const mostUsedRecipes = useMemo(() => filteredRecipes.sort((a, b) => b.reviews - a.reviews).slice(0, 4), [filteredRecipes]);
+  const mostUsedRecipes = useMemo(() => 
+    recipes.sort((a, b) => b.reviews - a.reviews).slice(0, 4), 
+    [recipes]
+  );
 
-  // Add useEffect for search navigation
   useEffect(() => {
     if (searchQuery.trim()) {
       setCurrentPage('search');
     }
   }, [searchQuery]);
 
-  // Add useEffect for scroll to top on page change
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [currentPage]);
 
-  // useCallback for toggleSaveRecipe
+  // NEW: Load recipes when filter changes
+  useEffect(() => {
+    if (currentPage === 'recommended') {
+      loadRecipesByFilter(filterType);
+    }
+  }, [filterType]);
+
   const toggleSaveRecipe = useCallback((recipeId) => {
     setSavedRecipes(prev => {
       if (prev.includes(recipeId)) {
@@ -407,7 +303,6 @@ const App = () => {
 
   const handleAuth = (e) => {
     e.preventDefault();
-    // Simple mock authentication
     if (email && password) {
       setIsLoggedIn(true);
       setShowAuthModal(false);
@@ -422,23 +317,8 @@ const App = () => {
     setCurrentPage('home');
   };
 
-  // Get filtered recipes for recommended page
-  const getFilteredRecommendations = () => {
-    if (filterType === 'all') return recipesDB;
-    if (filterType === 'breakfast' || filterType === 'lunch' || filterType === 'dinner' || filterType === 'dessert') {
-      return recipesDB.filter(r => r.mealTime === filterType);
-    }
-    if (filterType === 'italian' || filterType === 'mexican' || filterType === 'thai' || filterType === 'french' || filterType === 'american' || filterType === 'mediterranean') {
-      return recipesDB.filter(r => r.cuisine.toLowerCase() === filterType);
-    }
-    if (filterType === 'followed') {
-      return recipesDB.filter(r => r.chef === 'Moria Benzene');
-    }
-    return recipesDB;
-  };
-
   const handleShare = useCallback((recipe) => {
-    const url = window.location.href; // Placeholder; in a real app, use recipe-specific URL
+    const url = recipe.source || window.location.href;
     if (navigator.share) {
       navigator.share({
         title: recipe.title,
@@ -450,21 +330,37 @@ const App = () => {
     }
   }, []);
 
-  const RecipeSVG = ({ color1, color2 }) => (
-    <svg width="100%" height="100%" viewBox="0 0 300 220" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id={`grad${color1}`} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style={{ stopColor: color1, stopOpacity: 0.3 }} />
-          <stop offset="100%" style={{ stopColor: color2, stopOpacity: 0.3 }} />
-        </linearGradient>
-      </defs>
-      <rect width="300" height="220" fill={`url(#grad${color1})`} />
-      <circle cx="150" cy="110" r="60" fill={color1} opacity="0.6" />
-      <circle cx="120" cy="90" r="30" fill={color2} opacity="0.5" />
-      <circle cx="180" cy="130" r="35" fill={color1} opacity="0.4" />
-      <path d="M 100 180 Q 150 160 200 180" stroke={color2} strokeWidth="8" fill="none" strokeLinecap="round" opacity="0.6" />
-    </svg>
-  );
+  const RecipeSVG = ({ color1, color2, thumbnail }) => {
+    // If thumbnail exists, use it as background
+    if (thumbnail) {
+      return (
+        <div style={{ 
+          width: '100%', 
+          height: '100%', 
+          backgroundImage: `url(${thumbnail})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }} />
+      );
+    }
+    
+    // Fallback to SVG
+    return (
+      <svg width="100%" height="100%" viewBox="0 0 300 220" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id={`grad${color1}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style={{ stopColor: color1, stopOpacity: 0.3 }} />
+            <stop offset="100%" style={{ stopColor: color2, stopOpacity: 0.3 }} />
+          </linearGradient>
+        </defs>
+        <rect width="300" height="220" fill={`url(#grad${color1})`} />
+        <circle cx="150" cy="110" r="60" fill={color1} opacity="0.6" />
+        <circle cx="120" cy="90" r="30" fill={color2} opacity="0.5" />
+        <circle cx="180" cy="130" r="35" fill={color1} opacity="0.4" />
+        <path d="M 100 180 Q 150 160 200 180" stroke={color2} strokeWidth="8" fill="none" strokeLinecap="round" opacity="0.6" />
+      </svg>
+    );
+  };
 
   const RecipeCard = React.memo(({ recipe }) => (
     <div 
@@ -475,7 +371,7 @@ const App = () => {
       }}
     >
       <div className="recipe-img">
-        <RecipeSVG color1={recipe.color1} color2={recipe.color2} />
+        <RecipeSVG color1={recipe.color1} color2={recipe.color2} thumbnail={recipe.thumbnail} />
         <span className="recipe-badge">{recipe.badge}</span>
       </div>
       <div className="recipe-content">
@@ -492,7 +388,7 @@ const App = () => {
         <div className="recipe-footer">
           <div className="recipe-rating">
             <Star size={16} fill="currentColor" />
-            <span>{recipe.rating}</span>
+            <span>{recipe.rating.toFixed(1)}</span>
             <span style={{ color: 'var(--gray)', fontWeight: 'normal' }}>({recipe.reviews})</span>
           </div>
           <div className="recipe-actions">
@@ -529,13 +425,24 @@ const App = () => {
     </div>
   ));
 
+  const LoadingSpinner = () => (
+    <div style={{ textAlign: 'center', padding: '50px' }}>
+      <Loader size={48} className="spinner" style={{ color: 'var(--primary)' }} />
+      <p style={{ marginTop: '20px', color: 'var(--gray)' }}>Loading delicious recipes...</p>
+    </div>
+  );
+
   const HomePage = () => (
     <>
       <section className="hero">
         <div className="hero-content">
           <h1>Discover Amazing <span>Recipes</span> From Around The World</h1>
           <p>Join our community of food lovers and explore thousands of recipes, cooking tips, and culinary inspiration for every occasion and skill level.</p>
-          <button className="btn btn-primary" style={{ padding: '18px 38px', fontSize: '1.15rem' }}>
+          <button className="btn btn-primary" style={{ padding: '18px 38px', fontSize: '1.15rem' }}
+            onClick={() => {
+              setFilterType('all');
+              setCurrentPage('recommended');
+            }}>
             <span>🔥</span> Explore Trending Recipes
           </button>
         </div>
@@ -562,7 +469,7 @@ const App = () => {
             { icon: '🍗', name: 'Dinner', filter: 'dinner' },
             { icon: '🍰', name: 'Desserts', filter: 'dessert' },
             { icon: '🥗', name: 'Vegetarian', filter: 'vegetarian' },
-            { icon: '⚡', name: 'Quick Meals', filter: 'quick' }
+            { icon: '⚡', name: 'Quick Meals', filter: 'all' }
           ].map((cat, idx) => (
             <div 
               key={idx} 
@@ -570,12 +477,6 @@ const App = () => {
               onClick={() => {
                 setFilterType(cat.filter);
                 setCurrentPage('recommended');
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  setFilterType(cat.filter);
-                  setCurrentPage('recommended');
-                }
               }}
               tabIndex={0}
               role="button"
@@ -603,53 +504,26 @@ const App = () => {
             View All →
           </a>
         </div>
-        <div className="recipes-grid">
-          {recommendedRecipes.map(recipe => (
-            <RecipeCard key={recipe.id} recipe={recipe} />
-          ))}
-        </div>
+        {loading ? <LoadingSpinner /> : (
+          <div className="recipes-grid">
+            {recommendedRecipes.map(recipe => (
+              <RecipeCard key={recipe.id} recipe={recipe} />
+            ))}
+          </div>
+        )}
       </section>
 
       <section>
         <div className="section-header">
-          <h2 className="section-title">Most Used Recipes</h2>
-          <a href="#" className="view-all">View All →</a>
+          <h2 className="section-title">Most Popular Recipes</h2>
         </div>
-        <div className="recipes-grid">
-          {mostUsedRecipes.map(recipe => (
-            <RecipeCard key={recipe.id} recipe={recipe} />
-          ))}
-        </div>
-      </section>
-
-      <section>
-        <h2 className="section-title">Featured Chef of the Week</h2>
-        <div className="featured-chef">
-          <div className="chef-image">
-            <svg width="140" height="140" viewBox="0 0 140 140">
-              <circle cx="70" cy="70" r="70" fill="#FFD166"/>
-              <circle cx="70" cy="55" r="28" fill="#2D3047"/>
-              <path d="M 70 83 C 45 83, 40 115, 70 115 C 100 115, 95 83, 70 83" fill="#2D3047"/>
-              <circle cx="58" cy="48" r="5" fill="#FFF"/>
-              <circle cx="82" cy="48" r="5" fill="#FFF"/>
-              <rect x="50" y="25" width="40" height="15" fill="#FFF" rx="3"/>
-              <rect x="45" y="115" width="50" height="12" fill="#4ECDC4" rx="6"/>
-            </svg>
+        {loading ? <LoadingSpinner /> : (
+          <div className="recipes-grid">
+            {mostUsedRecipes.map(recipe => (
+              <RecipeCard key={recipe.id} recipe={recipe} />
+            ))}
           </div>
-          <div className="chef-info">
-            <h3>Chef Moria Benzene</h3>
-            <p>With over 15 years of experience in Mediterranean cuisine, Chef Moria shares her family recipes and innovative cooking techniques. Her recipes have been saved over 50,000 times by our community.</p>
-            <button 
-              className="btn btn-primary"
-              onClick={() => {
-                setFilterType('followed');
-                setCurrentPage('recommended');
-              }}
-            >
-              View Chef's Recipes
-            </button>
-          </div>
-        </div>
+        )}
       </section>
     </>
   );
@@ -665,7 +539,7 @@ const App = () => {
 
         <div className="recipe-header-section">
           <div className="recipe-hero-img">
-            <RecipeSVG color1={selectedRecipe.color1} color2={selectedRecipe.color2} />
+            <RecipeSVG color1={selectedRecipe.color1} color2={selectedRecipe.color2} thumbnail={selectedRecipe.thumbnail} />
           </div>
           <div className="recipe-header-info">
             <span className="recipe-badge">{selectedRecipe.badge}</span>
@@ -688,7 +562,7 @@ const App = () => {
                 </div>
               </div>
               <div className="stat">
-                <span style={{ fontSize: '24px' }}>🍽️</span>
+                <span style={{ fontSize: '24px' }}>�️</span>
                 <div>
                   <strong>{selectedRecipe.servings} servings</strong>
                   <span>{selectedRecipe.calories} cal/serving</span>
@@ -697,7 +571,7 @@ const App = () => {
               <div className="stat">
                 <Star size={24} fill="#FFC107" color="#FFC107" />
                 <div>
-                  <strong>{selectedRecipe.rating}</strong>
+                  <strong>{selectedRecipe.rating.toFixed(1)}</strong>
                   <span>{selectedRecipe.reviews} reviews</span>
                 </div>
               </div>
@@ -717,9 +591,14 @@ const App = () => {
                 <Bookmark size={20} fill={savedRecipes.includes(selectedRecipe.id) ? 'currentColor' : 'none'} />
                 {savedRecipes.includes(selectedRecipe.id) ? 'Saved' : 'Save Recipe'}
               </button>
-              <button className="btn btn-outline">
+              <button className="btn btn-outline" onClick={() => handleShare(selectedRecipe)}>
                 <Share2 size={20} /> Share
               </button>
+              {selectedRecipe.youtubeLink && (
+                <button className="btn btn-outline" onClick={() => window.open(selectedRecipe.youtubeLink, '_blank')}>
+                  📺 Watch Video
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -754,13 +633,6 @@ const App = () => {
   };
 
   const SearchPage = () => {
-    const searchResults = recipesDB.filter(recipe =>
-      recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      recipe.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      recipe.cuisine.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      recipe.chef.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
     return (
       <div className="search-page">
         <div className="page-header">
@@ -771,11 +643,11 @@ const App = () => {
         {searchQuery ? (
           <>
             <div className="search-results-header">
-              <h2>Found {searchResults.length} recipe{searchResults.length !== 1 ? 's' : ''} for "{searchQuery}"</h2>
+              <h2>Found {recipes.length} recipe{recipes.length !== 1 ? 's' : ''} for "{searchQuery}"</h2>
             </div>
-            {searchResults.length > 0 ? (
+            {loading ? <LoadingSpinner /> : recipes.length > 0 ? (
               <div className="recipes-grid">
-                {searchResults.map(recipe => (
+                {recipes.map(recipe => (
                   <RecipeCard key={recipe.id} recipe={recipe} />
                 ))}
               </div>
@@ -791,7 +663,7 @@ const App = () => {
           <div className="search-suggestions">
             <h2>Popular Searches</h2>
             <div className="search-tags">
-              {['Italian', 'Mexican', 'Dessert', 'Quick Meals', 'Breakfast', 'Pasta', 'Tacos', 'Pizza'].map(tag => (
+              {['Chicken', 'Pasta', 'Dessert', 'Vegetarian', 'Soup', 'Beef', 'Seafood', 'Rice'].map(tag => (
                 <button 
                   key={tag}
                   className="search-tag"
@@ -802,12 +674,14 @@ const App = () => {
               ))}
             </div>
 
-            <h2 style={{ marginTop: '50px' }}>All Recipes</h2>
-            <div className="recipes-grid">
-              {recipesDB.map(recipe => (
-                <RecipeCard key={recipe.id} recipe={recipe} />
-              ))}
-            </div>
+            <h2 style={{ marginTop: '50px' }}>Trending Recipes</h2>
+            {loading ? <LoadingSpinner /> : (
+              <div className="recipes-grid">
+                {recipes.slice(0, 8).map(recipe => (
+                  <RecipeCard key={recipe.id} recipe={recipe} />
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -815,8 +689,6 @@ const App = () => {
   };
 
   const RecommendedPage = () => {
-    const filteredRecipes = getFilteredRecommendations();
-
     return (
       <div className="recommended-page">
         <div className="page-header">
@@ -838,7 +710,7 @@ const App = () => {
                 className={`filter-btn ${filterType === 'breakfast' ? 'active' : ''}`}
                 onClick={() => setFilterType('breakfast')}
               >
-                🍳 Breakfast
+                🍳Breakfast
               </button>
               <button 
                 className={`filter-btn ${filterType === 'lunch' ? 'active' : ''}`}
@@ -850,13 +722,13 @@ const App = () => {
                 className={`filter-btn ${filterType === 'dinner' ? 'active' : ''}`}
                 onClick={() => setFilterType('dinner')}
               >
-                🍗 Dinner
+                🍗Dinner
               </button>
               <button 
                 className={`filter-btn ${filterType === 'dessert' ? 'active' : ''}`}
                 onClick={() => setFilterType('dessert')}
               >
-                🍰 Dessert
+                🍰Dessert
               </button>
             </div>
           </div>
@@ -894,42 +766,26 @@ const App = () => {
               >
                 🇺🇸 American
               </button>
-              <button 
-                className={`filter-btn ${filterType === 'mediterranean' ? 'active' : ''}`}
-                onClick={() => setFilterType('mediterranean')}
-              >
-                🌊 Mediterranean
-              </button>
-            </div>
-          </div>
-
-          <div className="filter-group">
-            <h3>By Chef</h3>
-            <div className="filter-buttons">
-              <button 
-                className={`filter-btn ${filterType === 'followed' ? 'active' : ''}`}
-                onClick={() => setFilterType('followed')}
-              >
-                ⭐ Followed Chefs
-              </button>
             </div>
           </div>
         </div>
 
         <div className="filtered-results">
-          <h2>{filteredRecipes.length} Recipe{filteredRecipes.length !== 1 ? 's' : ''}</h2>
-          <div className="recipes-grid">
-            {filteredRecipes.map(recipe => (
-              <RecipeCard key={recipe.id} recipe={recipe} />
-            ))}
-          </div>
+          <h2>{recipes.length} Recipe{recipes.length !== 1 ? 's' : ''}</h2>
+          {loading ? <LoadingSpinner /> : (
+            <div className="recipes-grid">
+              {recipes.map(recipe => (
+                <RecipeCard key={recipe.id} recipe={recipe} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     );
   };
 
   const ProfilePage = () => {
-    const userSavedRecipes = recipesDB.filter(recipe => savedRecipes.includes(recipe.id));
+    const userSavedRecipes = recipes.filter(recipe => savedRecipes.includes(recipe.id));
 
     return (
       <div className="profile-page">
@@ -1072,14 +928,6 @@ const App = () => {
     </div>
   ));
 
-  // Add loading state for page transitions
-  const [isLoading, setIsLoading] = useState(false);
-  useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => setIsLoading(false), 200); // Simulate loading
-    return () => clearTimeout(timer);
-  }, [currentPage]);
-
   return (
     <div className="app">
       <style>{`
@@ -1105,6 +953,14 @@ const App = () => {
           background: linear-gradient(135deg, #F7F9FC 0%, #EDF2F7 100%);
         }
 
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+
+        .spinner {
+          animation: spin 1s linear infinite;
+        }
+
         header {
           background: rgba(255, 255, 255, 0.95);
           backdrop-filter: blur(10px);
@@ -1124,7 +980,7 @@ const App = () => {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 10px 0; /* Reduced from 15px 0 for more compact navbar */
+          padding: 10px 0;
           gap: 20px;
           position: relative;
         }
@@ -1132,8 +988,8 @@ const App = () => {
         .logo {
           display: flex;
           align-items: center;
-          gap: 10px; /* Reduced gap */
-          font-size: 1.6rem; /* Slightly smaller */
+          gap: 10px;
+          font-size: 1.6rem;
           font-weight: 700;
           color: var(--primary);
           cursor: pointer;
@@ -1160,7 +1016,7 @@ const App = () => {
           text-decoration: none;
           color: var(--dark);
           font-weight: 600;
-          padding: 6px 12px; /* Smaller padding */
+          padding: 6px 12px;
           border-radius: 12px;
           cursor: pointer;
           transition: all 0.3s;
@@ -1215,13 +1071,13 @@ const App = () => {
 
         .search-bar {
           display: flex;
-          margin: 10px 0; /* Reduced from 20px 0 for less vertical space */
+          margin: 10px 0;
           max-width: 700px;
         }
 
         .search-bar input {
           flex: 1;
-          padding: 14px 24px; /* Slightly smaller */
+          padding: 14px 24px;
           border: 3px solid #E9ECEF;
           border-radius: 50px 0 0 50px;
           font-size: 1rem;
@@ -1453,41 +1309,6 @@ const App = () => {
           transform: scale(1.1);
         }
 
-        .featured-chef {
-          background: linear-gradient(135deg, var(--dark) 0%, #3A3E5C 100%);
-          border-radius: 20px;
-          padding: 50px;
-          color: white;
-          display: flex;
-          align-items: center;
-          gap: 50px;
-          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
-        }
-
-        .chef-image {
-          width: 180px;
-          height: 180px;
-          border-radius: 50%;
-          background: white;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border: 6px solid var(--primary);
-          flex-shrink: 0;
-        }
-
-        .chef-info h3 {
-          font-size: 2rem;
-          margin-bottom: 15px;
-        }
-
-        .chef-info p {
-          opacity: 0.95;
-          margin-bottom: 25px;
-          max-width: 700px;
-          font-size: 1.1rem;
-        }
-
         .flex {
           display: flex;
         }
@@ -1500,7 +1321,6 @@ const App = () => {
           gap: 0.25rem;
         }
 
-        /* Recipe Page Styles */
         .recipe-page {
           padding: 40px 0;
         }
@@ -1668,7 +1488,6 @@ const App = () => {
           flex: 1;
         }
 
-        /* Modal Styles */
         .modal-overlay {
           position: fixed;
           top: 0;
@@ -1785,146 +1604,6 @@ const App = () => {
           text-decoration: underline;
         }
 
-        /* Responsive */
-        @media (max-width: 1024px) {
-          .hero {
-            flex-direction: column;
-            text-align: center;
-          }
-
-          .hero h1 {
-            font-size: 3rem;
-          }
-
-          .recipe-header-section {
-            grid-template-columns: 1fr;
-          }
-
-          .recipe-details {
-            grid-template-columns: 1fr;
-          }
-        }
-
-        @media (max-width: 768px) {
-          .mobile-menu-btn {
-            display: block;
-          }
-
-          .nav-links {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            flex-direction: column;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            border-radius: 0 0 20px 20px;
-            gap: 0;
-            max-height: 0;
-            overflow: hidden;
-            opacity: 0;
-            transition: all 0.3s ease;
-          }
-
-          .nav-links.open {
-            max-height: 400px;
-            opacity: 1;
-            padding: 20px;
-          }
-
-          .nav-links a {
-            width: 100%;
-            padding: 15px 20px;
-            text-align: left;
-            border-radius: 12px;
-          }
-
-          .navbar {
-            flex-wrap: nowrap;
-          }
-
-          .user-actions {
-            flex-direction: column;
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: white;
-            padding: 20px;
-            border-radius: 0 0 20px 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            min-width: 200px;
-            max-height: 0;
-            overflow: hidden;
-            opacity: 0;
-            transition: all 0.3s ease;
-          }
-
-          .user-actions.open {
-            max-height: 300px;
-            opacity: 1;
-          }
-
-          .user-actions .btn {
-            width: 100%;
-            justify-content: center;
-          }
-
-          .hero h1 {
-            font-size: 2.5rem;
-          }
-
-          .featured-chef {
-            flex-direction: column;
-            text-align: center;
-            padding: 35px;
-          }
-
-          .recipes-grid {
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-          }
-
-          .section-title {
-            font-size: 2rem;
-          }
-
-          .recipe-stats {
-            grid-template-columns: 1fr;
-          }
-
-          .modal-content {
-            padding: 35px 25px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .hero h1 {
-            font-size: 2rem;
-          }
-
-          .section-title {
-            font-size: 1.7rem;
-          }
-
-          .recipe-header-info h1 {
-            font-size: 2rem;
-          }
-
-          .recipe-actions-bar {
-            flex-direction: column;
-          }
-
-          .ingredients-section,
-          .instructions-section {
-            padding: 25px;
-          }
-
-          .logo {
-            font-size: 1.5rem;
-          }
-        }
-
-        /* New Pages Styles */
         .page-header {
           text-align: center;
           padding: 60px 0 40px;
@@ -2139,13 +1818,150 @@ const App = () => {
           font-size: 1.1rem;
           margin-bottom: 30px;
         }
+
+        @media (max-width: 1024px) {
+          .hero {
+            flex-direction: column;
+            text-align: center;
+          }
+
+          .hero h1 {
+            font-size: 3rem;
+          }
+
+          .recipe-header-section {
+            grid-template-columns: 1fr;
+          }
+
+          .recipe-details {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .mobile-menu-btn {
+            display: block;
+          }
+
+          .nav-links {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            flex-direction: column;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-radius: 0 0 20px 20px;
+            gap: 0;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: all 0.3s ease;
+          }
+
+          .nav-links.open {
+            max-height: 400px;
+            opacity: 1;
+            padding: 20px;
+          }
+
+          .nav-links a {
+            width: 100%;
+            padding: 15px 20px;
+            text-align: left;
+            border-radius: 12px;
+          }
+
+          .navbar {
+            flex-wrap: nowrap;
+          }
+
+          .user-actions {
+            flex-direction: column;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            padding: 20px;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            min-width: 200px;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: all 0.3s ease;
+          }
+
+          .user-actions.open {
+            max-height: 300px;
+            opacity: 1;
+          }
+
+          .user-actions .btn {
+            width: 100%;
+            justify-content: center;
+          }
+
+          .hero h1 {
+            font-size: 2.5rem;
+          }
+
+          .recipes-grid {
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          }
+
+          .section-title {
+            font-size: 2rem;
+          }
+
+          .recipe-stats {
+            grid-template-columns: 1fr;
+          }
+
+          .modal-content {
+            padding: 35px 25px;
+          }
+
+          .profile-header {
+            flex-direction: column;
+            text-align: center;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .hero h1 {
+            font-size: 2rem;
+          }
+
+          .section-title {
+            font-size: 1.7rem;
+          }
+
+          .recipe-header-info h1 {
+            font-size: 2rem;
+          }
+
+          .recipe-actions-bar {
+            flex-direction: column;
+          }
+
+          .ingredients-section,
+          .instructions-section {
+            padding: 25px;
+          }
+
+          .logo {
+            font-size: 1.5rem;
+          }
+        }
       `}</style>
 
       <header>
         <div className="container">
           <nav className="navbar">
             <div className="logo" onClick={() => setCurrentPage('home')}>
-              <span>🍴</span>
+              <span>🴠</span>
               <span>FlavorFinds</span>
             </div>
             
@@ -2171,8 +1987,6 @@ const App = () => {
                 setFilterType('all');
                 setMobileMenuOpen(false);
               }}>Recommended</a>
-              <a onClick={() => setMobileMenuOpen(false)}>Categories</a>
-              <a onClick={() => setMobileMenuOpen(false)}>Chefs</a>
               {isLoggedIn && (
                 <a onClick={() => {
                   setCurrentPage('profile');
@@ -2189,12 +2003,6 @@ const App = () => {
                     setMobileMenuOpen(false);
                   }}>
                     Sign Out
-                  </button>
-                  <button className="btn btn-primary" onClick={() => {
-                    alert('Add Recipe functionality coming soon!');
-                    setMobileMenuOpen(false);
-                  }}>
-                    <Plus size={20} /> Add Recipe
                   </button>
                 </>
               ) : (
@@ -2233,17 +2041,11 @@ const App = () => {
       </header>
 
       <main className="container">
-        {isLoading ? (
-          <div style={{ textAlign: 'center', padding: '50px' }}>Loading...</div>
-        ) : (
-          <>
-            {currentPage === 'home' && <HomePage />}
-            {currentPage === 'recipe' && <RecipePage />}
-            {currentPage === 'search' && <SearchPage />}
-            {currentPage === 'recommended' && <RecommendedPage />}
-            {currentPage === 'profile' && <ProfilePage />}
-          </>
-        )}
+        {currentPage === 'home' && <HomePage />}
+        {currentPage === 'recipe' && <RecipePage />}
+        {currentPage === 'search' && <SearchPage />}
+        {currentPage === 'recommended' && <RecommendedPage />}
+        {currentPage === 'profile' && <ProfilePage />}
       </main>
 
       {showAuthModal && <AuthModal />}

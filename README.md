@@ -68,3 +68,24 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+
+   🍳 Breakfast
+              </button>
+              <button 
+                className={`filter-btn ${filterType === 'lunch' ? 'active' : ''}`}
+                onClick={() => setFilterType('lunch')}
+              >
+                🍔 Lunch
+              </button>
+              <button 
+                className={`filter-btn ${filterType === 'dinner' ? 'active' : ''}`}
+                onClick={() => setFilterType('dinner')}
+              >
+                🍗 Dinner
+              </button>
+              <button 
+                className={`filter-btn ${filterType === 'dessert' ? 'active' : ''}`}
+                onClick={() => setFilterType('dessert')}
+              >
+                🍰 Dessert
