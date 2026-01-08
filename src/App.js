@@ -562,7 +562,7 @@ const App = () => {
                 </div>
               </div>
               <div className="stat">
-                <span style={{ fontSize: '24px' }}>�️</span>
+                <span style={{ fontSize: '24px' }}>🍽️</span>
                 <div>
                   <strong>{selectedRecipe.servings} servings</strong>
                   <span>{selectedRecipe.calories} cal/serving</span>
@@ -1961,7 +1961,7 @@ const App = () => {
         <div className="container">
           <nav className="navbar">
             <div className="logo" onClick={() => setCurrentPage('home')}>
-              <span>🴠</span>
+              <span>🍴</span>
               <span>FlavorFinds</span>
             </div>
             
