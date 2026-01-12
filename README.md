@@ -1,91 +1,259 @@
-# Getting Started with Create React App
+# FlavorFinds 🍴
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+**A Modern Recipe Discovery & Sharing Web Application**
 
-## Available Scripts
+> U24 Aerospace Department - Software Design Assignment
+> 
+> Course: Software Design | Lecturer: [Lecturer Name]
+> 
+> Submission Date: [Date] | Project Status: ✅ Complete
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## 📋 Table of Contents
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- [Overview](#overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Installation & Setup](#installation--setup)
+- [Usage](#usage)
+- [API Integration](#api-integration)
+- [Component Architecture](#component-architecture)
+- [Key Functionalities](#key-functionalities)
+- [Future Enhancements](#future-enhancements)
+- [Team Members](#team-members)
+- [License](#license)
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## 🎯 Overview
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+**FlavorFinds** is a modern, full-featured recipe discovery and sharing application built with React. It enables users to explore thousands of recipes from around the world, search by ingredients or cuisine, save favorites, and share recipes with friends. The application integrates with the TheMealDB API to provide a comprehensive database of global recipes.
 
-### `npm run build`
+This project demonstrates:
+- Modern React architecture with component-based design
+- API integration and data transformation
+- State management with React Hooks
+- Responsive UI/UX design principles
+- Local storage persistence
+- Mobile-first responsive design
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+---
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## ✨ Features
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Core Features
 
-### `npm run eject`
+✅ **Recipe Discovery**
+- Browse trending recipes with curated recommendations
+- Filter recipes by meal time (Breakfast, Lunch, Dinner, Dessert)
+- Filter recipes by cuisine (Italian, Mexican, Thai, French, American)
+- Category-based browsing for quick access
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+✅ **Search Functionality**
+- Real-time recipe search with debounced queries
+- Popular search suggestions
+- Search results filtering and display
+- No-results fallback with helpful suggestions
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+✅ **Recipe Details**
+- Comprehensive recipe information display
+- Ingredient lists with measurements
+- Step-by-step cooking instructions
+- Nutritional information (servings, calories)
+- Difficulty level and time estimates
+- Rating and review statistics
+- YouTube video links (when available)
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+✅ **User Authentication**
+- Sign in / Sign up modal functionality
+- Password visibility toggle
+- Form validation
+- User profile management
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+✅ **Save & Personalization**
+- Save favorite recipes (requires login)
+- Persistent storage using localStorage
+- Personal recipe collection in profile
+- Quick access to saved recipes
 
-## Learn More
+✅ **Social Features**
+- Share recipes via native share API
+- Fallback link copying for unsupported browsers
+- Social metadata in share dialogs
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+✅ **Responsive Design**
+- Mobile-first approach
+- Tablet optimization
+- Desktop experience
+- Hamburger menu for mobile navigation
+- Collapsible navigation menus
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
 
-### Code Splitting
+## 🛠️ Tech Stack
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Frontend
+- **React** - UI library and framework
+- **React Hooks** - State management (useState, useEffect, useCallback, useMemo)
+- **Lucide React** - Icon library
+- **CSS3** - Styling with CSS variables and media queries
 
-### Analyzing the Bundle Size
+### API & Data
+- **TheMealDB API** - Recipe database and content
+- **REST API** - Data fetching and integration
+- **LocalStorage API** - Client-side data persistence
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### Development & Tools
+- **Create React App** - Project scaffolding
+- **Node.js/npm** - Package management
 
-### Making a Progressive Web App
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## 📁 Project Structure
 
-### Advanced Configuration
+```
+/my-app
+├── node_modules
+├── public
+│   ├── index.html
+│   ├── favicon.ico
+│   └── manifest.json
+└── src
+    ├── api
+    │   └── mealdb.js
+    ├── components
+    │   ├── Auth
+    │   │   ├── LoginForm.js
+    │   │   └── SignupForm.js
+    │   ├── Common
+    │   │   ├── Footer.js
+    │   │   └── Header.js
+    │   ├── Home
+    │   │   ├── FeaturedRecipes.js
+    │   │   └── SearchBar.js
+    │   ├── Recipe
+    │   │   ├── RecipeDetails.js
+    │   │   └── RecipeList.js
+    │   └── User
+    │       └── Profile.js
+    ├── context
+    │   └── AuthContext.js
+    ├── hooks
+    │   └── useAuth.js
+    ├── pages
+    │   ├── HomePage.js
+    │   ├── LoginPage.js
+    │   ├── NotFoundPage.js
+    │   └── RecipePage.js
+    ├── styles
+    │   ├── App.css
+    │   ├── index.css
+    │   └── variables.css
+    ├── utils
+    │   └── helpers.js
+    ├── App.js
+    ├── index.js
+    └── serviceWorker.js
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+---
 
-### Deployment
+## 🚀 Installation & Setup
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/yourusername/flavorfinds.git
+   ```
 
-### `npm run build` fails to minify
+2. **Navigate to the project directory**:
+   ```bash
+   cd flavorfinds
+   ```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+3. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
+4. **Start the development server**:
+   ```bash
+   npm start
+   ```
 
-   🍳 Breakfast
-              </button>
-              <button 
-                className={`filter-btn ${filterType === 'lunch' ? 'active' : ''}`}
-                onClick={() => setFilterType('lunch')}
-              >
-                🍔 Lunch
-              </button>
-              <button 
-                className={`filter-btn ${filterType === 'dinner' ? 'active' : ''}`}
-                onClick={() => setFilterType('dinner')}
-              >
-                🍗 Dinner
-              </button>
-              <button 
-                className={`filter-btn ${filterType === 'dessert' ? 'active' : ''}`}
-                onClick={() => setFilterType('dessert')}
-              >
-                🍰 Dessert
+5. **Open your browser and visit** [http://localhost:3000](http://localhost:3000)
+
+---
+
+## 🎮 Usage
+
+- **Explore Recipes**: Browse the home page to discover trending recipes.
+- **Search Recipes**: Use the search bar to find recipes by ingredients or cuisine.
+- **View Recipe Details**: Click on a recipe to see its details, including ingredients, instructions, and nutritional information.
+- **User Authentication**: Sign up or log in to save your favorite recipes.
+- **Profile Management**: Access your profile to manage saved recipes and account settings.
+
+---
+
+## 🌐 API Integration
+
+**FlavorFinds** integrates with the **TheMealDB API** and **Recipe-API** to fetch and display recipe data. The API provides endpoints for:
+- Searching recipes by name or ingredient
+- Fetching recipe details by ID
+- Browsing recipes by category or cuisine
+
+API calls are made from the frontend using the Fetch API, and data is managed using React state and effects.
+
+---
+
+## 🧩 Component Architecture
+
+The application is built using a component-based architecture. Key components include:
+- **App**: The root component that wraps the entire application.
+- **Header**: Displays the navigation and branding.
+- **Footer**: Shows copyright and links.
+- **HomePage**: The landing page that displays featured recipes and search bar.
+- **RecipePage**: Displays detailed information about a specific recipe.
+- **LoginPage**: User login and authentication.
+- **Profile**: User profile and saved recipes management.
+
+Components are organized by feature and functionality, making it easy to maintain and extend the application.
+
+---
+
+## 🔑 Key Functionalities
+
+- **Responsive Navigation**: Collapsible and expandable navigation menus for mobile and desktop.
+- **Debounced Search**: Optimized search input with reduced API calls.
+- **Local Storage Persistence**: Saved recipes are stored in the browser's local storage for offline access.
+- **User Authentication**: Secure sign-up and login with form validation and error handling.
+- **Dynamic Routing**: Seamless navigation between home, recipe details, login, and profile pages.
+
+---
+
+## ⏭️ Future Enhancements
+
+- Implement user roles and permissions (admin, user, guest)
+- Add recipe creation and editing capabilities for users
+- Integrate additional APIs for extended recipe data and cooking tips
+- Enhance search functionality with advanced filters and sorting options
+- Improve mobile responsiveness and performance optimizations
+
+---
+
+## 👥 Team Members
+
+- **[Your Name]** - Frontend Developer, UI/UX Designer
+- **[Teammate Name]** - Backend Developer, API Integration
+- **[Teammate Name]** - QA Tester, Documentation
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+Made with ❤️ by [Your Name]
