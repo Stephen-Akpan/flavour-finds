@@ -4,8 +4,8 @@ import { recipeApiAPI } from './recipeApiAPI';
 export const UnifiedAPI = {
   // Configuration for API sources
   sources: {
-    mealdb: true,
-    recipeapi: false // Set to true to enable
+    mealdb: false, // Set to true to enable
+    recipeapi: true // Set to true to enable
   },
 
   // Search recipes from one or both sources

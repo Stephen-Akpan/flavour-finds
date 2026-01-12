@@ -17,6 +17,8 @@ import { AuthModal } from './components/AuthModal';
 
 import './styles/App.css';
 
+const GUEST_SAVED_RECIPES_KEY = 'flavorfinds_guest_saved_recipes';
+
 const App = () => {
   const [currentPage, setCurrentPage] = useState('home');
   const [searchQuery, setSearchQuery] = useState('');
@@ -44,64 +46,42 @@ const App = () => {
   useEffect(() => {
     const user = UserService.getCurrentUser();
     if (user && UserService.isSessionValid()) {
+      // User is logged in - load their saved recipes
       setIsLoggedIn(true);
       setCurrentUser(user);
       setUserName(user.username || 'Food Lover');
       setSavedRecipes(user.savedRecipes || []);
     } else {
-      // Fallback to localStorage for backward compatibility
-      const saved = localStorage.getItem('savedRecipes');
-      if (saved) {
-        setSavedRecipes(JSON.parse(saved));
+      // User is not logged in - load guest saved recipes
+      const guestSaved = localStorage.getItem(GUEST_SAVED_RECIPES_KEY);
+      if (guestSaved) {
+        try {
+          setSavedRecipes(JSON.parse(guestSaved));
+        } catch (err) {
+          console.error('Failed to parse guest saved recipes:', err);
+          setSavedRecipes([]);
+        }
       }
     }
   }, []);
 
-  // Persist saved recipes for logged-in users
+  // Persist saved recipes based on login status
   useEffect(() => {
     if (isLoggedIn && currentUser) {
-      UserService.saveRecipe(currentUser.id, null); // Trigger persistence
-      localStorage.setItem('savedRecipes', JSON.stringify(savedRecipes));
+      // Save to user account (this is handled by toggleSaveRecipe through UserService)
+      localStorage.setItem(GUEST_SAVED_RECIPES_KEY, JSON.stringify(savedRecipes));
     } else {
-      // Persist for non-logged-in users
-      localStorage.setItem('savedRecipes', JSON.stringify(savedRecipes));
+      // Save to guest storage
+      localStorage.setItem(GUEST_SAVED_RECIPES_KEY, JSON.stringify(savedRecipes));
     }
   }, [savedRecipes, isLoggedIn, currentUser]);
-
-  useEffect(() => {
-    const saved = localStorage.getItem('savedRecipes');
-    if (saved) {
-      setSavedRecipes(JSON.parse(saved));
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('savedRecipes', JSON.stringify(savedRecipes));
-  }, [savedRecipes]);
 
   useEffect(() => {
     loadInitialRecipes();
     loadCategories();
   }, []);
 
-  const handleAuthSubmit = (e) => {
-    e.preventDefault();
-    if (email && password) {
-      setIsLoggedIn(true);
-      setShowAuthModal(false);
-      setEmail('');
-      setPassword('');
-    }
-  };
-
-  const handleLoginSuccess = (user) => {
-    setIsLoggedIn(true);
-    setCurrentUser(user);
-    setUserName(user.username || 'Food Lover');
-    setSavedRecipes(user.savedRecipes || []);
-  };
-
-   const loadInitialRecipes = async () => {
+  const loadInitialRecipes = async () => {
     setLoading(true);
     try {
       let transformedRecipes = [];
@@ -245,15 +225,26 @@ const App = () => {
 
   const toggleSaveRecipe = useCallback((recipeId) => {
     setSavedRecipes(prev => {
+      let updatedRecipes;
+      
       if (prev.includes(recipeId)) {
-        return prev.filter(id => id !== recipeId);
+        updatedRecipes = prev.filter(id => id !== recipeId);
       } else {
-        return [...prev, recipeId];
+        updatedRecipes = [...prev, recipeId];
       }
-    });
-  }, []);
 
-  const handleAuth = (e) => {
+      // Also update user's saved recipes if logged in
+      if (isLoggedIn && currentUser) {
+        UserService.updateProfile(currentUser.id, {
+          savedRecipes: updatedRecipes
+        });
+      }
+
+      return updatedRecipes;
+    });
+  }, [isLoggedIn, currentUser]);
+
+  const handleAuthSubmit = (e) => {
     e.preventDefault();
     if (email && password) {
       setIsLoggedIn(true);
@@ -263,13 +254,28 @@ const App = () => {
     }
   };
 
+  const handleLoginSuccess = (user) => {
+    setIsLoggedIn(true);
+    setCurrentUser(user);
+    setUserName(user.username || 'Food Lover');
+    // Load user's saved recipes from their account
+    setSavedRecipes(user.savedRecipes || []);
+  };
+
   const handleSignOut = () => {
     const result = UserService.logout();
     if (result.success) {
+      // Preserve saved recipes from guest storage before clearing user data
+      const guestSaved = localStorage.getItem(GUEST_SAVED_RECIPES_KEY);
+      const guestRecipes = guestSaved ? JSON.parse(guestSaved) : [];
+
       setIsLoggedIn(false);
       setCurrentUser(null);
-      setSavedRecipes([]);
+      // Keep saved recipes - they persist in guest storage
+      setSavedRecipes(guestRecipes);
       setUserName('Food Lover');
+      setEmail('');
+      setPassword('');
       setCurrentPage('home');
     }
   };

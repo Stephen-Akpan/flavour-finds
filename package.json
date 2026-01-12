@@ -2,6 +2,7 @@
   "name": "flavour-finds",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://YOUR_GITHUB_USERNAME.github.io/flavour-finds",
   "dependencies": {
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
@@ -12,7 +13,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
@@ -36,6 +39,7 @@
     "@testing-library/react": "^14.0.0",
     "@testing-library/jest-dom": "^6.1.4",
     "@testing-library/user-event": "^14.5.1",
-    "jest": "^29.7.0"
+    "jest": "^29.7.0",
+    "gh-pages": "^6.1.0"
   }
 }
