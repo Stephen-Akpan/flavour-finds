@@ -970,6 +970,10 @@ section {
     justify-content: center;
   }
 
+  .search-bar {
+    max-width: 100%;
+  }
+
   .hero h1 {
     font-size: 2.5rem;
   }
@@ -1020,5 +1024,12 @@ section {
 
   .logo {
     font-size: 1.5rem;
+  }
+}
+
+/* Specific fix for devices around 720px width like Redmi A5 */
+@media (max-width: 750px) {
+  .search-bar {
+    max-width: calc(100vw - 40px); /* Account for container padding */
   }
 }

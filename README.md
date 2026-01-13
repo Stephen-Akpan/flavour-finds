@@ -2,11 +2,11 @@
 
 **A Modern Recipe Discovery & Sharing Web Application**
 
-> U24 Aerospace Department - Software Design Assignment
+> U24 Aerospace Engineering Department - Software Engineering Assignment
 > 
-> Course: Software Design | Lecturer: [Lecturer Name]
+> Course: Computer and Software Engineering | Lecturer: Mr. Henry O. Mafua
 > 
-> Submission Date: [Date] | Project Status: ✅ Complete
+> Submission Date: 14/01/2026 | Project Status: ✅ Complete
 
 ---
 
@@ -114,7 +114,7 @@ This project demonstrates:
 ## 📁 Project Structure
 
 ```
-/my-app
+/flavor-finds
 ├── node_modules
 ├── public
 │   ├── index.html
@@ -122,7 +122,8 @@ This project demonstrates:
 │   └── manifest.json
 └── src
     ├── api
-    │   └── mealdb.js
+    │   └── mealdbAPI.js
+    │   └── reciperApiAPI.js
     ├── components
     │   ├── Auth
     │   │   ├── LoginForm.js

@@ -6,15 +6,12 @@ export const ProfilePage = ({
   email, 
   isLoggedIn, 
   savedRecipes, 
-  recipes, 
   setCurrentPage, 
   onSelectRecipe, 
   onToggleSave, 
   onShare, 
   setShowAuthModal 
 }) => {
-  const userSavedRecipes = recipes.filter(recipe => savedRecipes.includes(recipe.id));
-
   return (
     <div className="profile-page">
       <div className="profile-header">
@@ -47,9 +44,9 @@ export const ProfilePage = ({
 
       <div className="profile-content">
         <h2>My Saved Recipes</h2>
-        {isLoggedIn && userSavedRecipes.length > 0 ? (
+        {isLoggedIn && savedRecipes.length > 0 ? (
           <div className="recipes-grid">
-            {userSavedRecipes.map(recipe => (
+            {savedRecipes.map(recipe => (
               <RecipeCard 
                 key={recipe.id} 
                 recipe={recipe} 

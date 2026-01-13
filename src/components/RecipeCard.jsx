@@ -36,15 +36,15 @@ export const RecipeCard = React.memo(({ recipe, savedRecipes, isLoggedIn, onSele
               if (!isLoggedIn) {
                 setShowAuthModal(true);
               } else {
-                onToggleSave(recipe.id);
+                onToggleSave(recipe);
               }
             }}
             style={{
-              background: savedRecipes.includes(recipe.id) ? 'var(--primary)' : '#F7F9FC',
-              color: savedRecipes.includes(recipe.id) ? 'white' : 'var(--gray)'
+              background: savedRecipes.some(saved => saved.id === recipe.id) ? 'var(--primary)' : '#F7F9FC',
+              color: savedRecipes.some(saved => saved.id === recipe.id) ? 'white' : 'var(--gray)'
             }}
           >
-            <Bookmark size={18} fill={savedRecipes.includes(recipe.id) ? 'currentColor' : 'none'} />
+            <Bookmark size={18} fill={savedRecipes.some(saved => saved.id === recipe.id) ? 'currentColor' : 'none'} />
           </button>
           <button 
             className="action-btn"

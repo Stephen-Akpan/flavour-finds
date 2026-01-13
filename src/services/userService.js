@@ -23,7 +23,7 @@ export const UserService = {
         username: sanitizeInput(username) || email.split('@')[0],
         password: btoa(password), // Basic encoding (NOT secure - use backend in production)
         createdAt: new Date().toISOString(),
-        savedRecipes: [],
+        savedRecipes: [], // Now stores full recipe objects
         preferences: {
           theme: 'light',
           notifications: true
@@ -139,7 +139,7 @@ export const UserService = {
   },
 
   // Save recipe for user
-  saveRecipe: (userId, recipeId) => {
+  saveRecipe: (userId, recipe) => {
     try {
       const users = UserService.getAllUsers();
       const user = users.find(u => u.id === userId);
@@ -148,8 +148,14 @@ export const UserService = {
         return { success: false, error: 'User not found' };
       }
 
-      if (!user.savedRecipes.includes(recipeId)) {
-        user.savedRecipes.push(recipeId);
+      // Check if recipe is already saved (by ID)
+      const existingIndex = user.savedRecipes.findIndex(saved => saved.id === recipe.id);
+      if (existingIndex === -1) {
+        // Add full recipe object
+        user.savedRecipes.push(recipe);
+      } else {
+        // Update existing recipe with latest data
+        user.savedRecipes[existingIndex] = recipe;
       }
 
       const userIndex = users.findIndex(u => u.id === userId);
@@ -203,7 +209,7 @@ export const UserService = {
     try {
       const users = UserService.getAllUsers();
       const user = users.find(u => u.id === userId);
-      return user ? user.savedRecipes : [];
+      return user ? user.savedRecipes : []; // Now returns full recipe objects
     } catch {
       return [];
     }

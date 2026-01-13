@@ -223,21 +223,20 @@ const App = () => {
     }
   }, [filterType]);
 
-  const toggleSaveRecipe = useCallback((recipeId) => {
+  const toggleSaveRecipe = useCallback((recipe) => {
     setSavedRecipes(prev => {
       let updatedRecipes;
       
-      if (prev.includes(recipeId)) {
-        updatedRecipes = prev.filter(id => id !== recipeId);
+      const isSaved = prev.some(saved => saved.id === recipe.id);
+      if (isSaved) {
+        updatedRecipes = prev.filter(saved => saved.id !== recipe.id);
       } else {
-        updatedRecipes = [...prev, recipeId];
+        updatedRecipes = [...prev, recipe];
       }
 
       // Also update user's saved recipes if logged in
       if (isLoggedIn && currentUser) {
-        UserService.updateProfile(currentUser.id, {
-          savedRecipes: updatedRecipes
-        });
+        UserService.saveRecipe(currentUser.id, recipe);
       }
 
       return updatedRecipes;
@@ -435,7 +434,6 @@ const App = () => {
           email={email}
           isLoggedIn={isLoggedIn}
           savedRecipes={savedRecipes}
-          recipes={recipes}
           setCurrentPage={setCurrentPage}
           onSelectRecipe={handleSelectRecipe}
           onToggleSave={toggleSaveRecipe}
