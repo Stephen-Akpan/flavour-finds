@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "/flavour-finds/static/css/main.255c994f.css",
+    "main.js": "/flavour-finds/static/js/main.aca3cea2.js",
+    "static/js/453.8fc6037c.chunk.js": "/flavour-finds/static/js/453.8fc6037c.chunk.js",
+    "static/media/pounded-yam.jpg": "/flavour-finds/static/media/pounded-yam.76268939a366210df68c.jpg",
+    "index.html": "/flavour-finds/index.html",
+    "main.255c994f.css.map": "/flavour-finds/static/css/main.255c994f.css.map",
+    "main.aca3cea2.js.map": "/flavour-finds/static/js/main.aca3cea2.js.map",
+    "453.8fc6037c.chunk.js.map": "/flavour-finds/static/js/453.8fc6037c.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.255c994f.css",
+    "static/js/main.aca3cea2.js"
+  ]
+}
